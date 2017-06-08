@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Clustered MongoDB Slides</title>
+		<title>60 minute sentences</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/black.css">
@@ -24,388 +24,180 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section data-markdown> <!-- Opening -->
+				<!-- Opening / Overview-->
+				<section data-markdown>
 					<script type="text/template">
-					## MongoDB Sharded Clusters on Docker Networks
-					<h4>Using docker-compose, bash scripts and healthchecks</h4>
-
-					<p>Lukas Borges: FIU // Software Engineer, All Now Corp</p>
-					<p>lborges@allnowcorp.com // [github/lborg019](http://github.com/lborg019)</p>
+					## 60 minute sentence
+					<p>Gabriel Calderon, Ihosvanny Reyes, Kristen Prado, Lukas Borges, Madison Jimenez, Michael Sheriff, Olivia Loguercio, and Victor Jorges</p>
 					</script>
 				</section>
+
+				<!-- Poster -->
+				<section data-background-image="./ht/imgs/poster.jpg" data-background-size="65vh"></section>
+
 				<section data-markdown>
 					<script type="text/template">
 						## Overview
 						<!-- A paragraph with some text and a [link](http://hakim.se). -->
-						<section>What is MongoDB?</section>
-            			<section>What is Docker?</section>
-						<section>How to Combine Both?</section>
-					</script>
-				</section>
-				<section data-background-image="./ht/imgs/mongodb.png" data-background-size="400px"> <!-- MongoDB Secgion -->
-					What is MongoDB?</br>
-					<ul>
-					<li>MongoDB</li>
-					<li>Sharding</li>
-					<li>Basic Commands</li>
-					<li>Plan of Attack</li>
-					<li>How to Shard?</li>
+						<section>Narrative Structure</section>
+            			<section>Global Issue</section>
+						<section>Cinematography</section>
+						<section>Editing, sound editing, music</section>
+						<section>Production Design</section>
 
-					</ul>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						<section>MongoDB is a NoSQL document-oriented database.</section>
-						<section>Mongo uses JSON-like documents with schemas, instead of tables and rows (as in relational databases).</section>
-						<section>Hierarchy:</br>
-							Infrastructure / MongoDB / Databases / Collections / JSON Data
-						</section>
-						<section data-background-image="./ht/imgs/hierarchy.png" data-background-size="600px">
-						</section>
-						<section>
-							MongoDB Data:</br>
-								<pre class="stretch"><code data-trim data-noescape>
-								{
-									"_id" : ObjectId("584326f4de11cc88bee98b89"),
-									"electionname" : "Presidential election",
-									"state" : "all",
-									"route" : "presidential",
-									"candidates" : [ 
-										{
-											"name" : "Bernie Sanders",
-											"party" : "Democratic",
-											"avatar" : "./app-content/avatars/bernie_blue.svg",
-											"votes" : 4
-										}, 
-										{
-											"name" : "Donald Trump",
-											"party" : "Republican",
-											"avatar" : "./app-content/avatars/trump_pink.svg",
-											"votes" : 2
-										}]
-								}
-								</code></pre>
-						</section>
-						<section>
-							Basic MongoDB commands:
-							<pre><code data-trim data-noescape>
-							$ mongo $ip:$port
-							$ show dbs
-							$ use $databasename
-							$ show collections
-							$ db.$collectionname.insert({$jsondata})
-							$ db.getCollections('$collectionname').find({})
-							</code></pre>
-						</section>
-						<section>Mongo Shards</section>
-						<section>Instead of writing your data to a single collection, Mongo can scatter your data along different servers when writing, and gather it when reading.</section>
-						<section data-background-image="./ht/imgs/sharded-collection2.png" data-background-size="600px">
-						</section>
-						<section>Reasons for Sharding:</section>
-						<section>
-						Performance: By spreading the data, reads and writes are distributed among nodes in the cluster. Combined with bulk writes, we improve system's overall performance.
-						</section>
-						<section>
-						Security: If a hacker gains access to one of the shards, he will only have partial data. If data is encrypted, even safer.
-						</section>
-						<section>
-						Persistence: If a hacker takes down a shard, a replica can automatically be deployed. Two replicas per shard is usually enough
-						</section>
-						<section>
-						Integration: System is "invisible". Application will read and write to the database like in any regular MongoDB. The system will take care of the scatter/gather steps in the cluster.
-						</section>
-						<section>
-						How to create a sharded cluster in MongoDB?
-						</section>
-						<section>
-							Step 1) All nodes in our cluster must be online
-						</section>
-							<section data-background-image="./ht/imgs/plan-of-attack3.png" data-background-size="800px">
-							</section>
-						<section>
-							Step 2) Start the three config servers with the following command:
-							<pre><code data-trim data-noescape>
-								$ mongod --configsvr --dbpath /mongo-metadata --port 27019
-							</code></pre>
-						</section>
-						<section>
-							Step 3) Start the router server with the following command:
-							<pre><code data-trim data-noescape>
-								$ mongos --configdb
-								config0.example.com:27019,
-								config1.example.com:27019,
-								config2.example.com:27019
-							</code></pre>
-						</section>
-						<section>
-							Step 4) Access the router, add shards to the cluster:
-							<pre><code data-trim data-noescape>
-								$ sh.addShard("shard0.example.com:27017")
-								$ sh.addShard("shard1.example.com:27017")
-								$ sh.addShard("shard1.example.com:27017")
-							</code></pre>
-						</section>
-						<section>
-							Step 5) Still in the Router, add replica sets to the cluster:
-							<pre><code data-trim data-noescape>
-								$ sh.addShard("rs1/shard0.example.com:27017")
-								$ sh.addShard("rs2/shard1.example.com:27017")
-							</code></pre>
-						</section>
-						<section>
-							Step 6) Enable Sharding on the Database Level
-							<pre><code data-trim data-noescape>
-								$ show dbs
-								$ use dbname
-								$ sh.enableSharding("dbname")
-							</code></pre>
-						</section>
-						
-						<section>
-							Step 7) Define shard key (strategy). If unsure about data distribution, or (inexistent) hash the _id field.
-							<pre><code data-trim data-noescape>
-								$ use dbname
-								$ db.dbname_collection.ensureIndex({ _id: "hashed" })
-							</code></pre>
-						</section>
-
-						<section>
-							Step 8) Define shard key (strategy). If unsure about data distribution, or (inexistent) hash the _id field.
-							<pre><code data-trim data-noescape>
-								$ sh.shardCollection("dbname.dbname_collection", { "_id":"hashed" }) 
-							</code></pre>
-							And we are ready to insert data.
-						</section>
-
-						<section>
-						Plan of Attack
-						</section>
-							<section>
-							We will use multiple *Docker* containers running MongoDB networked together to create our cluster
-							</section>
-							<section data-background-image="./ht/imgs/plan-of-attack3.png" data-background-size="800px">
-							</section>
-						</section>
-					</script>
-				</section>
-				<!-- docker -->
-				<section data-background-image="./ht/imgs/docker-logo.png" data-background-size="500px">
-					What is Docker?<br>
-					<ul>
-					<li>Docker Hub</li>
-					<li>Dockerfile</li>
-					<li>Dockercompose</li>
-					</ul>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-					<section>
-					Docker containers wrap a piece of software in a complete filesystem that contains everything needed to run: code, runtime, system tools, system libraries - anything that can be installed on a server.
-					This guarantees that the software will always run the same, regardless of its environment.
-					</section>
-					<section>Virtual Machine vs. Docker:</section>
-					<section data-background-image="./ht/imgs/vmvscont.png" data-background-size="1300px">
-					</section>
-					<section> 
-					Installing Docker:
-					[docker.com/products/overview](https://docker.com/products/overview) </br>
-					Latest Docker installer comes bundled with Docker Compose and Docker Machine, making Docker Toolbox obsolete.</br>
-					Bash completion for Docker makes things easier.</br>
-					<img src="./ht/imgs/docker-toolbox.png" width="40%">
-					</section>
-					<section>
-						Basic Docker Commands
-						<pre><code data-trim data-noescape>
-						$ docker run $image 
-						$ docker start $name|$id
-						$ docker stop $name|$id
-						$ docker ps [-a include stopped containers]
-						$ docker rm $name|$id
-						$ docker images
-						</code></pre>
-
-					</section>
-					<section>
-						Docker Hub
-					</section>
-					<section>
-						Official Docker images are hosted in Docker Hub (much like Github).</br>
-						Users can pull official releases of images from the Docker Hub repository and run them
-					</section>
-					<section data-background-image="./ht/imgs/dockerhub.png" data-background-size="800px">
-
-					</section>
-					<section>
-						Running:
-						<pre><code data-trim data-noescape>
-  						$ docker run tutum/hello-world
-						</code></pre>
-						If absent, downloads the image from Docker Hub and runs it.
-					</section>
-					<section>
-						Users can run container processes detached, or interactively.
-					</section>
-					<section>
-						Users can expose and map internet ports between container and host.
-					</section>
-					<section>
-						Users can mount host's files and folders to container.
-					</section>
-					<section>
-						Dockerfile
-					</section>
-					<section>
-						Users will often need more than a pre-built with Docker Hub image.
-						Building a custom Docker container is simple with the use of a Dockerfile.
-					</section>
-					<section>
-						Example:
-						<pre><code data-trim data-noescape>
-							$ touch Dockerfile
-							$ vim Dockerfile
-							
-							FROM ubuntu
-
-							CMD ["echo hello from container!"]
-
-							$ docker build
-
-						</code></pre>
-					</section>
-					<section>
-						Other useful command tags for Dockerfile:
-						<pre><code data-trim data-noescape>
-							ADD
-							EXPOSE
-							RUN
-						</code></pre>
-						complete list at [docs.docker.com/engine/reference/builder](https://docs.docker.com/engine/reference/builder/)
-					</section>
-					<section>
-						With Dockerfiles we can create custom Docker containers.
-					</section>
-					<section>
-						Problem: creating, running, and managing containers one-by-one can be complicated.
-					</section>
-					<section>
-						*Docker Compose* solves such problems.
-					</section>
-					<section data-background-image="./ht/imgs/compose-logo.png" data-background-size="500px">
-						Docker Compose
-					</section>
-					<section>
-						Compose is a tool for defining and running multi-container Docker applications.
-					</section>
-					<section>
-						Multiple containers are able to communicate over a virtual network
-						<pre><code data-trim data-noescape>
-							$ touch composefile.yml
-							$ vim composefile.yml
-						</code></pre>
-					</section>
-					<section>
-						composefile.yml
-						<pre class="stretch"><code data-trim data-noescape>
-						version: '2'
-						services:
-							# Config Servers
-							cfg1:
-								image: mongo:3.0.6
-								ports:
-									- "9091:27017"
-								volumes:
-									- ./docker-volumes/mongocluster/cfg1:/data/configdb
-								command: mongod --configsvr --noauth --port 27017
-							cfg2:
-								image: mongo:3.0.6
-								ports:
-									- "9092:27017"
-								volumes:
-									- ./docker-volumes/mongocluster/cfg1:/data/configdb 
-								command: mongod --configsvr --noauth --port 27017
-						</code></pre>
-					</section>
-					<section>
-						To create Docker containers listed in the composefile:
-						<pre><code data-trim data-noescape>
-							$ docker-compose -f composefile.yml up
-						</code></pre>
-					</section>
-					<section>
-						To destroy Docker containers listed in the composefile:
-						<pre><code data-trim data-noescape>
-							$ docker-compose -f composefile.yml down
-						</code></pre>
-					</section>
-					<section>
-						With Docker Compose we are now able to create multiple intercommunicating containers applications
-					</section>
 					</script>
 				</section>
 
+				<!-- Narrative Structure -->
 				<section>
-					Combining MongoDB and Docker Compose
+					Narrative Structure:</br>
+					<ul>
+					<li>Plot</li>
+					<li>Story Information</li>
+					<li>3 act structure</li>
+					<li>Characters</li>
+					</ul>
 				</section>
-
 				<section data-markdown>
 					<script type="text/template">
-						<section>
-							With this knowledge base, let's remind ourselves the Plan of Attack
+						<section>Plot:
+							<p>A man receives a watch that causes him to age at rapid pace,
+							forcing him to find out the mystery of his newfound curse.
+							</p>
 						</section>
-						<section>
-							We can use multiple **Docker** containers running **MongoDB** networked together to create our cluster [2]
+						<section>Story Information:
+							<p>
+								At first the character is seen a victim, but as the story progresses,
+								his hidden personality of greed and rage is shown through flashbacks.
+								His main goals are to find out why is tragedy happening to him and 
+								how to lift the curse.
+							</p>
 						</section>
-						<section data-background-image="./ht/imgs/plan-of-attack3.png" data-background-size="800px">
+						<section>3 Act Structure
+							<p>Act 1: Main character and supporting characters are introduced, story is laid out</p>
+							<p>Act 2: After much toil our protagonist finally removes the watch</p>
+							<p>Act 3: After the main character dies, film is cut to the last scene in which the watch is purchased by someone else, claiming its next victim.</p>
 						</section>
-						<section>
-							Our pseudo composefile.yml for 2 shards and 3 replicas might look something like this:
-						<pre class="stretch"><code data-trim data-noescape>
-						version: '2'
-						services:
-							# Config Servers
-							cfg1:
-							cfg2:
-							cfg3:
+						<section>Characters
+							<section>
+							<ul>
+								<li>John Black (32): Main character</li>
+								<li>Ana Black (31): John’s wife</li>
+								<li>Henry (44): Lawyer at Ultimate Financial</li> 
+								<li>Lupe (75): Owner of Ropa Vieja</li>
+								<li>Linda (28): Receptionist at Ultimate Financial</li> 
+								<li>Young woman at Ropa Vieja</li>   
+							</ul>
+							</section>
+						</section>
+						<!--<section data-background-image="./ht/imgs/vmvscont.png" data-background-size="1300px"</section>-->
+					</script>
+				</section>
+				<section>
 
-							# shards and replicas
-							sh1_repl1: 				# sh1
-							sh1_repl2:
-							sh1_repl3:
+				<!-- Global Issue-->
+					Global Issue<br>
+					<ul>
+					<li>Corporate Greed</li>
+					<li>Extended Work hours</li>
+					</ul>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+					<section>
+						<p>We wanted to portray John as an overworked corporate executive
+						who barely has time to see his wife.</p>
 
-							sh2_repl1: 				# sh2
-							sh2_repl2:
-							sh2_repl3:
+						<p>John is also very successful, having acquired a lot of money from his
+						corrupt ponzi schemes, abusing people's trust to steal from them.</p>
+						</p>
 
-							# Router
-							router:
-						</code></pre>
+					</section>
+					</script>
+				</section>
+
+				<!-- Cinematography -->
+				<section>
+					Cinematography<br>
+					<ul>
+						<li>Lighting</li>
+						<li>Camera Movement</li>
+						<li>Composition/Framing/Type of Shots</li>
+						<li>Examples</li>
+					</ul>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						<section>Lighting
+
 						</section>
-						<section>
-							Problem: We are still hardcoding the cluster size on the Docker Compose file.
-						</section>
-						<section>
-							Solution? Create a script.
-						</section>
-						<section>
-							1) Script should write the dockercompose.yml file according to user specs
-						</section>
-						<section>
-							2) Run the dockercompose.yml and configure the MongoDB containers to work in sharded mode.
-						</section>
-						<section>
-							What we want:
-							<pre><code data-trim>
-								$ script databasename collectionname shards replicas port
-							</code></pre>
-						</section>
-						<section>
-							Demo
-						</section>
-						<section>
-							Sharding step-by-step
+						<section>Camera Movement</section>
+						<section>Composition/Framing/Type of Shots</section>
+						<section>Examples
+							<section>
+							<ul>
+								<li>Picture goes here</li>
+							</ul>
+							</section>
 						</section>
 					</script>
 				</section>
+
+				<!-- Editing, Sound Editing, Music -->
+				<section>
+					Editing, Sound Editing, Music <br>
+					<ul>
+						<li>Pacing/Rhythm of Cuts/Type of Cuts</li>
+						<li>Sound design for film and music</li>
+					</ul>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						<section>Pacing/Rhythm of Cuts/Type of Cuts</section>
+						<section>Sound design for film and music
+							<section>
+							<ul>
+								<li>list</li>
+							</ul>
+							</section>
+						</section>
+					</script>
+				</section>
+
+				<!-- Production Design -->
+				<section>
+					Production Design<br>
+					<ul>
+						<li>Location</li>
+						<li>Setting</li>
+						<li>Colors</li>
+						<li>Visual Effects</li>
+					</ul>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						<section>Location
+							<p>FIU</p>
+						</section>
+						<section>Setting</section>
+							<p>								
+							</p>
+						<section>Colors</section>
+						<section>Visual Effects
+							<section>
+							<ul>
+								<li>Picture goes here</li>
+							</ul>
+							</section>
+						</section>
+					</script>
+				</section>
+
+				<!-- Trailer -->
+				<section>
+					<iframe width="560" height="315" src="https://www.youtube.com/embed/0Nm1ZeJjvmw" frameborder="0" allowfullscreen></iframe>
+				</section>
+
 				<!-- misc -->
 			</div>
 		</div>

@@ -1,0 +1,17 @@
+{
+  "files.exclude": {
+    ".idea/": "explorerExcludedFiles",
+    "*.iml": "explorerExcludedFiles",
+    "*.iws": "explorerExcludedFiles",
+    "*.eml": "explorerExcludedFiles",
+    "out/": "explorerExcludedFiles",
+    ".DS_Store": "explorerExcludedFiles",
+    ".svn": "explorerExcludedFiles",
+    "log/*.log": "explorerExcludedFiles",
+    "tmp/**": "explorerExcludedFiles",
+    "node_modules/": "explorerExcludedFiles",
+    ".sass-cache": "explorerExcludedFiles",
+    "css/reveal.min.css": "explorerExcludedFiles",
+    "js/reveal.min.js": "explorerExcludedFiles"
+  }
+}
