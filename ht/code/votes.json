@@ -1,0 +1,20 @@
+/* MongoDB - Collection name: elections*/
+{
+    "_id" : ObjectId("584326f4de11cc88bee98b89"),
+    "electionname" : "Presidential election",
+    "state" : "all",
+    "route" : "presidential",
+    "candidates" : [ 
+        {
+            "name" : "Bernie Sanders",
+            "party" : "Democratic",
+            "avatar" : "./app-content/avatars/presidential/bernie_blue.svg",
+            "votes" : 4
+        }, 
+        {
+            "name" : "Donald Trump",
+            "party" : "Republican",
+            "avatar" : "./app-content/avatars/presidential/trump_pink.svg",
+            "votes" : 2
+        }]
+}

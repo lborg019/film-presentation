@@ -1,0 +1,17 @@
+version: '2'
+services:
+    # Config Servers
+    cfg1:
+        image: mongo:3.0.6
+        ports:
+            - "9091:27017"
+        volumes:
+            - ./docker-volumes/mongocluster/cfg1:/data/configdb
+        command: mongod --noprealloc --smallfiles --configsvr --noauth --port 27017
+    cfg2:
+        image: mongo:3.0.6
+        ports:
+            - "9092:27017"
+        volumes:
+            - ./docker-volumes/mongocluster/cfg1:/data/configdb 
+        command: mongod --noprealloc --smallfiles --configsvr --noauth --port 27017

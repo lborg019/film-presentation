@@ -1,0 +1,151 @@
+Clustered MongoDB on Docker Networks
+Using docker-compose and bash scripts
+28 Feb 2017
+
+Lukas Borges
+Software Engineer, All Now Corporation
+lborges@allnowcorp.com
+http://github.com/lborg019
+damn son
+
+* Overview
+- MongoDB
+- Mongo Shards | Replication
+- Docker
+- Setting up Docker + MongoDB Cluster
+
+* What is MongoDB?
+.image ./imgs/mongodb-logo-1.png
+
+* What is MongoDB?
+MongoDB is a NoSQL document-oriented database. Mongo uses JSON-like documents with schemas, instead of tables and rows (as in relational databases).
+
+Infrastructure / MongoDB / Databases / Collections / JSON Data
+.image ./imgs/hierarchy.png
+
+* MongoDB Data
+.code ./code/votes.json
+
+
+* Mongo Shards
+Instead of writing your data to a single collection, Mongo can scatter your data along different servers when writing, and gather it when reading.
+.image ./imgs/sharded-collection2.png 400 _
+
+* Reasons for Sharding
+
+- Performance: By spreading the data, reads and writes are distributed among nodes in the cluster. Combined with bulk writes, we improve system's overall performance.
+- Security: If a hacker gains access to one of the shards, he will only have partial data. If data is encrypted, even safer.
+- Persistence: If a hacker takes down a shard, a replica can automatically be deployed. 2 replicas per shard is usually enough
+- Integration: System is "invisible". Application will just read and write like it would to any other database. Mongo will take care of the scatter/gather steps in the cluster.
+
+* Basic MongoDB commands:
+  $ mongo <ip>:<port>
+  $ show dbs
+  $ use <databasename>
+  $ show collections
+  $ db.<collectionname>.insert( { <json data>} )
+  $ db.getCollections('<collectionname>').find({})
+
+* Plan of attack:
+We can use multiple *Docker* containers running MongoDB networked together to create our cluster:
+
+* What is Docker?
+.background ./imgs/docker-logo.png
+
+* What is Docker?
+Docker containers wrap a piece of software in a complete filesystem that contains everything needed to run: code, runtime, system tools, system libraries - anything that can be installed on a server.
+This guarantees that the software will always run the same, regardless of its environment.
+
+.image ./imgs/kernel.png 230 _
+.caption https://www.docker.com/what-docker
+
+
+* Virtual Machine vs. Docker:
+.image ./imgs/vmvscont.png 350 _ 
+- Virtual Machines include the application, the necessary binaries, and an entire guest operating system.
+- Containers include the application and all of its dependencies, but share the kernel with other containers. Run as isolated processes in user space on the host. Highly Portable.
+
+* Installing Docker
+Go to
+.link https://docker.com/products/overview 
+and download Docker for your system.
+Latest Docker installer comes bundled with Docker Compose and Docker Machine, making Docker Toolbox obsolete.
+Installing bash completion for Docker makes things easier.
+.image ./imgs/docker-toolbox.png 300 _
+
+* Docker Hub
+Official Docker images are hosted in Docker Hub.
+Users can pull official releases of images from the Docker Hub repository and run them.
+.image ./imgs/dockerhub.png 400 _ 
+
+* Basic Docker Commands:
+  $ docker run <image> 
+  $ docker start <name|id>
+  $ docker stop <name|id>
+  $ docker ps [-a include stopped containers]
+  $ docker rm <name|id>
+  $ docker images
+ 
+Running:
+
+  $ docker run tutum/hello-world
+
+If absent, downloads the image from Docker Hub and runs it.
+
+- Users can run container processes detached, or interactively.
+- Users can expose and map internet ports between container and host.
+- Users can mount host's files and folders to container.
+
+* Dockerfile
+Users will often need more than a pre-built with Docker Hub image.
+Building a custom Docker container is simple with the use of a Dockerfile.
+
+    $ touch Dockerfile
+    $ vim Dockerfile
+
+.code ./code/Dockerfile
+
+    $ docker build
+
+Other useful tags for Dockerfile commands are:
+
+    ADD
+    EXPOSE
+    RUN
+
+.link https://docs.docker.com/engine/reference/builder/
+
+* Docker Compose
+.background ./imgs/compose-logo.png _ 150
+
+* Docker Compose
+Compose is a tool for defining and running multi-container Docker applications.
+
+- Multiple containers able to communicate over a virtual network
+
+    $ touch composefile.yml
+
+.code ./code/composefile.yml
+
+
+* Kitematic
+.background ./imgs/kitematic.png _ 150
+
+* Is Docker Safe?
+
+* How to make this System Flexible?
+
+* How will Sharded data look like?
+
+* Next steps
+- Docker Swarm
+
+* References
+https://www.docker.com/
+http://container-solutions.com/is-docker-safe-for-production/
+https://opensource.com/business/14/9/security-for-docker
+https://opensource.com/business/14/7/docker-security-selinux
+https://sebastianvoss.com/docker-mongodb-sharded-cluster.html
+https://www.digitalocean.com/community/tutorials/how-to-create-a-sharded-cluster-in-mongodb-using-an-ubuntu-12-04-vps
+https://github.com/singram/mongo-docker-compose/blob/master/docker-compose.yml
+Learn Docker in 12 minutes - https://www.youtube.com/watch?v=YFl2mCHdv24
